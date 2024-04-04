@@ -1,6 +1,6 @@
 import { Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Select, useDisclosure } from "@chakra-ui/react";
 import { Plus } from "lucide-react";
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { useToast } from '@chakra-ui/react'
 import { useAddTransaction, useGetAllCategory } from "../../hooks/component";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,12 +17,17 @@ const AddTransaction = () => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const category = formData.get('category');
-    const amountStr = formData.get('amount');
-    const amount = typeof amountStr === 'string' ? parseInt(amountStr) : NaN;
+    const amount = parseFloat(event.target.elements.amount.value);
     const description = formData.get('description');
     const date = formData.get('date');
     const tag = "dummy";
     const transaction_id = Math.floor(Math.random() * 1000000);
+
+    if(amount<=0){
+      alert("Amount must be greater than 0");
+      return
+    }
+    
     mutate({category,amount,description,date,tag,transaction_id},
       {
         onSuccess: () =>{
@@ -30,7 +35,7 @@ const AddTransaction = () => {
             title: 'Transaction added successfully.',
             status:'success',
             duration: 2000,
-            position: 'top-right',
+            position: 'bottom-right',
             isClosable: true,
           })
           queryClient.invalidateQueries({queryKey:['alltransactions']});
@@ -79,7 +84,6 @@ const AddTransaction = () => {
             </FormControl>
 
           </ModalBody>
-
           <ModalFooter>
             <Button type="submit" colorScheme='green' mr={3}>
               Save

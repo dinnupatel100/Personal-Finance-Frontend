@@ -29,3 +29,9 @@ export interface ITransaction {
   tag: string;
   transaction_id: number;
 }
+
+export interface chartObject{
+  category:string,
+  totalBudget:number,
+  totalSpend:number
+}

@@ -68,10 +68,11 @@ const SignIn = () => {
             </div>
             <div className="flex items-center justify-between mt-8">
               <button
-                className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-20"
                 type="submit"
+                disabled={isPending}
               >
-                Sign In
+                {isPending ? 'Submitting' : 'Sign In'}
               </button>
               <Link to='..\signup' className="hover:underline">Don't have an account?</Link>
             </div>

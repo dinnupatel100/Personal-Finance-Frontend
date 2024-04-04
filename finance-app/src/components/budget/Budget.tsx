@@ -2,16 +2,19 @@ import {  Table, TableContainer, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/rea
 import { useDeleteBudget, useDeleteTransaction, useGetAllBudget, useGetAllTransactions } from "../../hooks/component";
 import { SquareX } from "lucide-react";
 import { useState } from "react";
-import { Pagination } from "antd";
-import { InboxOutlined } from "@ant-design/icons";
+import { Pagination, Modal } from "antd";
+import { InboxOutlined,ExclamationCircleFilled } from "@ant-design/icons";
 import Navbar from "../Navbar";
 import AddBudget from "./AddBudget";
-// import UpdateTransaction from "./UpdateTransaction";
+import UpdateBudget from "./UpdateBudget";
+import { Navigate} from "react-router-dom"
 
 const Budget = () => {
+  const { confirm } = Modal;
   const { data, isError, isLoading } = useGetAllBudget();
   const {mutate: deleteMutate} = useDeleteBudget();
   const [currentPage, setCurrentPage] = useState(1);
+  const token = localStorage.getItem('token');
   const itemsPerPage = 5;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -25,7 +28,22 @@ const Budget = () => {
     deleteMutate(id);
   }
 
+  const showDeleteConfirm = (id:number) => {
+    confirm({
+      title: 'Delete Budget',
+      icon: <ExclamationCircleFilled />,
+      content: 'Are you sure to delete this budget?',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk() {
+        handleDelete(id);
+      },
+    });
+  };
+
   return (
+    <> {!token ? <Navigate to='/signin'></Navigate> :
     <div>
       <Navbar/>
       <div className="flex justify-end space-x-6 mt-10 mr-28">
@@ -55,9 +73,9 @@ const Budget = () => {
                     <Td>{new Date(budget.endperiod).toLocaleDateString('en-GB')}</Td>
                     <Td>
                       <div className="flex">
-                        {/* <UpdateBudget id={budget.id}/> */}
+                        <UpdateBudget id={budget.ID}/>
                         <button className="ml-6 text-red-700 text-xl"
-                          onClick={()=>handleDelete(budget.ID)}>
+                          onClick={()=>showDeleteConfirm(budget.ID)}>
                           <SquareX />
                         </button>
                       </div>
@@ -90,6 +108,8 @@ const Budget = () => {
         </div>
       </div>
     </div>
+    }
+    </>
   )
 }
 

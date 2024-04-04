@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { IUser, IUserLogin } from "../types/type"
 import axios from "axios"
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,6 @@ import { useToast } from "@chakra-ui/react";
 export const useAddUser = () => {
   const toast = useToast();
   const navigate = useNavigate();
-
   return useMutation({
     mutationKey: ["addUser"],
     mutationFn: async(user: IUser) => {
@@ -19,7 +18,7 @@ export const useAddUser = () => {
         title: 'Account created successfully.',
         status: 'success',
         duration: 2000,
-        position: 'top-right',
+        position: 'bottom-right',
         isClosable: true,
       })
       navigate('/signin');
@@ -29,7 +28,7 @@ export const useAddUser = () => {
         title: error.message || "An error occurred.",
         status: "error",
         duration: 2000,
-        position: "top-right",
+        position: "bottom-right",
         isClosable: true,
       });
     }
@@ -38,6 +37,7 @@ export const useAddUser = () => {
 
 
 export const useLoginUser = () => {
+  const queryClient = useQueryClient();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -51,11 +51,13 @@ export const useLoginUser = () => {
         title: 'Signed in successfully',
         status: 'success',
         duration: 3000,
-        position: 'top-right',
+        position: 'bottom-right',
         isClosable: true,
       })
       localStorage.setItem('token', response.data.token)
+      localStorage.setItem('name', response.data.username)
       navigate('/')
+      queryClient.invalidateQueries({queryKey:['alltransactions']});
     },
     onError:(error)=>{
       if(error.message === "Request failed with status code 400"){
@@ -63,7 +65,7 @@ export const useLoginUser = () => {
           title: 'Invalid email or password',
           status: 'error',
           duration: 3000,
-          position: 'top-right',
+          position: 'bottom-right',
           isClosable: true,
         })
       }
@@ -72,7 +74,7 @@ export const useLoginUser = () => {
           title: 'Server Error',
           status: 'error',
           duration: 3000,
-          position: 'top-right',
+          position: 'bottom-right',
           isClosable: true,
         })
       }

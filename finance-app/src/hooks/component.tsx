@@ -2,7 +2,6 @@ import { useToast } from "@chakra-ui/react";
 import { useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import { ICategory, ITransaction } from "../types/type";
 import axios from "axios";
-import { useEffect, useState } from "react";
 
 const token = localStorage.getItem('token');
 
@@ -25,7 +24,7 @@ export const useAddCategory = () => {
         title: "Failed to add category",
         status: "error",
         duration: 2000,
-        position: "top-right",
+        position: "bottom-right",
         isClosable: true,
       });
     }
@@ -34,7 +33,6 @@ export const useAddCategory = () => {
 
 export const useAddTransaction = () => {
   const toast = useToast();
-  
   return useMutation({
     mutationKey: ["addTransaction"],
     mutationFn: async(transaction:any) => {
@@ -52,7 +50,7 @@ export const useAddTransaction = () => {
         title: "Failed to add transaction",
         status: "error",
         duration: 2000,
-        position: "top-right",
+        position: "bottom-right",
         isClosable: true,
       });
     }
@@ -61,6 +59,7 @@ export const useAddTransaction = () => {
 
 export const useAddBudget = () => {
   const toast = useToast();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["addBudget"],
     mutationFn: async(budget:any) => {
@@ -72,13 +71,23 @@ export const useAddBudget = () => {
           }
         }
         )
-      },
+    },
+    onSuccess:() => {
+      toast({
+        title: 'Budget added successfully.',
+        status:'success',
+        duration: 2000,
+        position: 'bottom-right',
+        isClosable: true,
+      });
+      queryClient.invalidateQueries({queryKey:['allbudget']});
+    },
     onError: () => {
       toast({
         title: "Failed to add budget",
         status: "error",
         duration: 2000,
-        position: "top-right",
+        position: "bottom-right",
         isClosable: true,
       });
     }
@@ -136,7 +145,7 @@ export const useDeleteTransaction = () => {
         title: "Transaction deleted successfully",
         status: "success",
         duration: 1000,
-        position: "top-right",
+        position: "bottom-right",
         isClosable: true,
       });
       queryClient.invalidateQueries({queryKey:['alltransactions']});
@@ -146,7 +155,7 @@ export const useDeleteTransaction = () => {
         title: "Failed to delete transaction",
         status: "error",
         duration: 1000,
-        position: "top-right",
+        position: "bottom-right",
         isClosable: true,
       });
     }
@@ -155,7 +164,6 @@ export const useDeleteTransaction = () => {
 
 export const useUpdateTransaction = () => {
   const toast = useToast();
-  const queryClient = useQueryClient();
   
   return useMutation({
     mutationKey: ["updateTransaction"],
@@ -169,22 +177,12 @@ export const useUpdateTransaction = () => {
         }
       )
     },
-    onSuccess: () => {
-      toast({
-        title: "Transaction updated successfully",
-        status: "success",
-        duration: 1000,
-        position: "top-right",
-        isClosable: true,
-      });
-      queryClient.invalidateQueries({queryKey:['alltransactions']});
-    },
     onError: () => {
       toast({
         title: "Failed to update transaction",
         status: "error",
         duration: 1000,
-        position: "top-right",
+        position: "bottom-right",
         isClosable: true,
       });
     }
@@ -209,6 +207,7 @@ export const useGetAllBudget = () => {
 
 export const useDeleteBudget = () => {
   const toast = useToast();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["deleteBudget"],
     mutationFn: async(id:number) => {
@@ -225,16 +224,17 @@ export const useDeleteBudget = () => {
         title: "Budget deleted successfully",
         status: "success",
         duration: 1000,
-        position: "top-right",
+        position: "bottom-right",
         isClosable: true,
       });
+      queryClient.invalidateQueries({queryKey:['allbudget']});
     },
     onError: () => {
       toast({
         title: "Failed to delete budget",
         status: "error",
         duration: 1000,
-        position: "top-right",
+        position: "bottom-right",
         isClosable: true,
       });
     }
@@ -243,6 +243,7 @@ export const useDeleteBudget = () => {
 
 export const useDeleteCategory = () => {
   const toast = useToast();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["deletecategory"],
     mutationFn: async(id:number) => {
@@ -259,25 +260,26 @@ export const useDeleteCategory = () => {
         title: "category deleted successfully",
         status: "success",
         duration: 1000,
-        position: "top-right",
+        position: "bottom-right",
         isClosable: true,
       });
+      queryClient.invalidateQueries({queryKey:['allcategory']});
     },
     onError: () => {
       toast({
         title: "Failed to delete category",
         status: "error",
         duration: 1000,
-        position: "top-right",
+        position: "bottom-right",
         isClosable: true,
       });
     }
   })
 } 
 
-export const useGetDataByCategory = (category:string | null) => {
+export const useGetDataByCategory = (category:string) => {
     return useQuery({
-      queryKey: ['dataByCategory', 'category'],
+      queryKey: ['dataByCategory', category],
       queryFn: async() => {
         const res = await axios.get(process.env.REACT_APP_BASE_URL+"/api/getonetransaction?category="+category,
           {
@@ -291,33 +293,71 @@ export const useGetDataByCategory = (category:string | null) => {
     })  
 }
 
+export const useGetTransaction = (id:number) => {
+  return useQuery({
+    queryKey: ['getTransaction',id],
+    queryFn: async() => {
+      const res = await axios.get(process.env.REACT_APP_BASE_URL+"/api/gettransactionbyid?id="+id,
+        {
+          headers: {
+            Authorization: token
+          }
+        }
+      );
+      return res.data as ITransaction
+    },
+  })  
+}
 
+export const useGetBudget = (id:number) => {
+  return useQuery({
+    queryKey: ['getBudget',id],
+    queryFn: async() => {
+      const res = await axios.get(process.env.REACT_APP_BASE_URL+"/api/getbudgetbyid?id="+id,
+        {
+          headers: {
+            Authorization: token
+          }
+        }
+      );
+      return res.data as {ID:number, category:string, amount:number, startperiod:string, endperiod:string}
+    },
+  })
+}
 
-// export const useGetDataByCategory = (category: string | null) => {
-//   const [data, setData] = useState<ITransaction[]>([]);
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//           const res = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/getonetransaction?category=${category}`, {
-//             headers: {
-//               Authorization: token, // assuming token is defined
-//             },
-//           });
-//           return res.data as ITransaction;
-//       } catch (error) {
-//         console.error('Error fetching data:', error);
-//         return null;
-//       }
-//     };
-
-//     const fetchDataAndUpdateState = async () => {
-//       const newData = await Promise.all([fetchData()]);
-//       const filteredData = newData.filter((item) => item !== null) as ITransaction[];
-//       setData(filteredData);
-//     };
-//     fetchDataAndUpdateState();
-//   }, [category]);
-
-//   return data;
-// };
+export const useUpdateBudget = () => {
+  const toast = useToast();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["updateBudget"],
+    mutationFn: async(budget:any) => {
+      return await axios.put(process.env.REACT_APP_BASE_URL+"/api/updatebudget?id="+budget.id,
+        budget,
+        {
+          headers: {
+            Authorization: token
+          }
+        }
+      )
+    },
+    onSuccess: () => {
+      toast({
+        title: "Budget updated successfully",
+        status: "success",
+        duration: 1000,
+        position: "bottom-right",
+        isClosable: true,
+      })
+      queryClient.invalidateQueries({queryKey:['allbudget']});
+    },
+    onError: () => {
+      toast({
+        title: "Failed to update budget",
+        status: "error",
+        duration: 1000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  })
+}

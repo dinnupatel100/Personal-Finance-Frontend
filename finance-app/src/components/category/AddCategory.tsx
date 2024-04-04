@@ -3,12 +3,14 @@ import { Plus } from "lucide-react";
 import React from "react";
 import { useToast } from '@chakra-ui/react'
 import { useAddCategory } from "../../hooks/component";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AddCategory = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const initialRef = React.useRef(null)
   const finalRef = React.useRef(null)
   const toast = useToast();
+  const queryClient = useQueryClient();
   const {mutate, isPending} = useAddCategory()
 
   const onSubmit = async (event:any) => {
@@ -21,9 +23,10 @@ const AddCategory = () => {
             title: 'Category added successfully.',
             status: 'success',
             duration: 2000,
-            position: 'top-right',
+            position: 'bottom-right',
             isClosable: true,
           })
+          queryClient.invalidateQueries({queryKey:['allcategory']});
           onClose();
         }
       })

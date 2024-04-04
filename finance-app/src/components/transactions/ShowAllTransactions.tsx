@@ -1,28 +1,32 @@
-import {  Table, TableContainer, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react"
+import { Table, TableContainer, Tbody, Td, Th, Thead, Tr} from "@chakra-ui/react"
 import { useDeleteTransaction, useGetAllTransactions, useGetDataByCategory } from "../../hooks/component";
 import { SquareX } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Pagination } from "antd";
-import { InboxOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import { Modal, Empty, Pagination } from "antd";
+import { ExclamationCircleFilled } from '@ant-design/icons';
 import UpdateTransaction from "./UpdateTransaction";
-import { handleFilterChange } from "../../helper/helper";
+import { handleFilterChange } from "../../helper/util";
 import { ITransaction } from "../../types/type";
+import React from "react";
 
 type Props = {
   frequency: string;
-  category: string | null;
+  category: string
 };
 
-const ShowAllTransactions:React.FC<Props> = ({ frequency ,category}) => {
+const ShowAllTransactions:React.FC<Props> = ({ frequency, category}) => {
+  const { confirm } = Modal;
   const { data, isError, isLoading } = useGetAllTransactions();
   const {mutate: deleteMutate} = useDeleteTransaction();
+  const res = useGetDataByCategory(category);
+  const filteredDataByCategory = res.data || [] as (ITransaction[]);
+  const filteredData = category !='' ? handleFilterChange(frequency, filteredDataByCategory): handleFilterChange(frequency, data);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const filteredData = handleFilterChange(frequency, data);
   const transactions:Array<object> = filteredData && filteredData.slice(indexOfFirstItem, indexOfLastItem)
-
+  
   const handlePageChange = (page:number) => {
     setCurrentPage(page);
   }
@@ -31,8 +35,22 @@ const ShowAllTransactions:React.FC<Props> = ({ frequency ,category}) => {
     deleteMutate(id);
   }
 
+  const showDeleteConfirm = (id:number) => {
+    confirm({
+      title: 'Delete Transaction',
+      icon: <ExclamationCircleFilled />,
+      content: 'Are you sure delete this transaction?',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk() {
+        handleDelete(id);
+      },
+    });
+  };
+
   return (
-    <div className="flex mt-10">
+    <div className="flex mt-14">
       <div className="pl-24 pr-24 w-screen">
         <TableContainer>
           <Table variant='simple'>
@@ -57,10 +75,11 @@ const ShowAllTransactions:React.FC<Props> = ({ frequency ,category}) => {
                   <Td>
                     <div className="flex">
                       <UpdateTransaction id={transaction.id}/>
-                      <button className="ml-6 text-red-700 text-xl"
-                        onClick={()=>handleDelete(transaction.id)}>
+                      <button className='ml-6 text-red-700 text-xl'
+                        onClick={()=>showDeleteConfirm(transaction.id)}>
                         <SquareX />
                       </button>
+                      
                     </div>
                   </Td>
                 </Tr>
@@ -69,14 +88,11 @@ const ShowAllTransactions:React.FC<Props> = ({ frequency ,category}) => {
 
           </Table>
           <div className="flex justify-center mt-4">
-            {!data && 
-              <div>
-                <InboxOutlined className="text-6xl opacity-30"/> 
-                <p className="opacity-80">No Data</p>
-              </div>
+            {!filteredData.length && 
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
             }
           </div>
-          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center mb-12">
+          <div className="fixed bottom-0 mt-20 left-1/2 transform -translate-x-1/2 flex justify-center mb-12">
             {data &&  
               <Pagination 
                 defaultCurrent={1}
@@ -86,7 +102,7 @@ const ShowAllTransactions:React.FC<Props> = ({ frequency ,category}) => {
               />
             }
           </div>
-          
+          <div className="mt-20"></div>
         </TableContainer>
       </div>
     </div>

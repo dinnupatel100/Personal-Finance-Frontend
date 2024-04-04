@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useGetAllCategory } from "./component";
 import axios from "axios";
 import { ITransaction } from "../types/type";
-import { handleFilterChange } from "../helper/helper";
+import { handleFilterChange } from "../helper/util";
 
 interface IChartData {
   category: string;
@@ -19,7 +19,7 @@ export const useCategoryAmount = (frequency:string) => {
       const fetchData = async () => {
         const promises = allcategory.map(async (category) => {
           try {
-            const res = await axios.get(
+            const {data} = await axios.get(
               process.env.REACT_APP_BASE_URL +
                 "/api/getonetransaction?category=" +
                 category.categoryname,
@@ -31,7 +31,7 @@ export const useCategoryAmount = (frequency:string) => {
             );
             // const filteredData = handleFilterChange(frequency, res.data);
             let amount = 0;
-            const transactions = res.data || [] as (ITransaction[]);
+            const transactions = data || [] as (ITransaction[]);
             transactions.forEach((item: ITransaction) => {
               amount += item.amount;
             });

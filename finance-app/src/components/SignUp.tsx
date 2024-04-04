@@ -1,8 +1,6 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import image from "../images/Designer.png";
-import { useToast } from '@chakra-ui/react'
 import { useAddUser } from "../hooks/registration";
 import { SignUpInitialValues, SignUpValidationSchema } from "../constants/constant";
 
@@ -110,7 +108,7 @@ const SignUp = () => {
                 type="submit"
                 disabled={isPending}
               >
-                {isPending? 'Submitting': 'Sign Up'}
+              {isPending? 'Submitting': 'Sign Up'}
               </button>
               <Link to='..\signin' className="hover:underline">Already have an account?</Link>
             </div>

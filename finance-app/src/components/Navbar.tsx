@@ -1,3 +1,4 @@
+import { AlipayOutlined } from "@ant-design/icons";
 import { useToast } from "@chakra-ui/react"
 import { CircleUserRound, LogOut } from "lucide-react"
 import { useNavigate } from "react-router-dom";
@@ -5,8 +6,11 @@ import { useNavigate } from "react-router-dom";
 const Navbar = () => {
   const navigate = useNavigate();
   const toast = useToast();
+  const name = localStorage.getItem('name');
+
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('name');
     toast({
       title: 'Logged out successfully',
       status:'success',
@@ -18,11 +22,11 @@ const Navbar = () => {
   }
 
   return (
-    <div className="flex bg-teal-200 h-16">
+    <div className="flex bg-teal-200  h-16">
       <div className="flex flex-grow ml-6">
-        <p className="mt-4 text-xl font-sans font-normal">SpendSmart</p>
+        <p className="mt-4 text-xl font-sans font-normal"><AlipayOutlined  className="mr-2 text-2xl"/>SpendSmart</p>
         <button 
-          className="ml-40 mt-4 h-9 hover:underline"
+          className="ml-64 mt-4 h-9 hover:underline"
           onClick={()=>navigate('/')}>
           Home
         </button>
@@ -38,7 +42,7 @@ const Navbar = () => {
         </button>
       </div>
       <div className="flex mt-2 mr-16 text-base">
-        <p className="flex mr-10 text-base mt-4 "><CircleUserRound className="mr-2"/>Hi, Dinesh</p>
+        <p className="flex mr-10 text-base mt-4 "><CircleUserRound className="mr-2"/>Hi, {name}</p>
         <button 
           className="flex bg-teal-300 mt-2 border-solid border-2 border-teal-300 rounded-lg px-2 py-1 h-9 hover:bg-teal-200"
           onClick={handleLogout}>
